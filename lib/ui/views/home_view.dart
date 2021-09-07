@@ -14,19 +14,31 @@ class HomePageView extends StatelessWidget {
         appBar: AppBar(title: Text('Welcome to Any Chat')),
         body: model.state == ViewState.Busy
             ? CircularProgressIndicator()
-            : Column(
-                children: [
-                  ElevatedButton(
-                    child: Text('Start chatting!'),
-                    onPressed: () async {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => ChatPageView()));
-                    },
-                  ),
-                  Text(model.state == ViewState.Error
-                      ? "Couldn't connect to server"
-                      : "")
-                ],
+            : Center(
+                child: Column(
+                  children: [
+                    Text(model.justDisconnected
+                        ? "Stranger left the chat!"
+                        : ""),
+                    ElevatedButton(
+                      child: Text('Start chatting!'),
+                      onPressed: () {
+                        model.setState(ViewState.Busy);
+                        Navigator.of(context)
+                            .push(MaterialPageRoute(
+                                builder: (context) => ChatPageView()))
+                            .then((value) {
+                          model.notifyListeners();
+                          return;
+                        });
+                        model.setState(ViewState.Idle);
+                      },
+                    ),
+                    Text(model.state == ViewState.Error
+                        ? "Couldn't connect to server"
+                        : "")
+                  ],
+                ),
               ),
       );
     });
